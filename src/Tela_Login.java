@@ -6,12 +6,19 @@ import javax.swing.border.LineBorder;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.sql.*;
 
-public class Tela_Login extends JFrame {
+public class Tela_Login extends javax.swing.JFrame {
+    Connection conexao = null;
+    PreparedStatement pst = null;
+    ResultSet rs = null;
     private JTextField campoUsuario;
     private JPasswordField campoSenha;
 
     public Tela_Login() {
+        initComponents ();
+        conexao = ModuloConexao.conector();
+        System.out.println(conexao);
         setTitle("PR_solutions   Tela de Login");
         setSize(800, 500);
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
@@ -22,7 +29,7 @@ public class Tela_Login extends JFrame {
         Color corDeFundo = new Color(100, 152, 250); // Azul suave
         Color corTexto = new Color(255, 255, 255); // Branco para o texto
         Color corBordaCampo = new Color(65, 115, 217); // Azul médio para a borda do campo
-        Color corFundoCampo = new Color(101, 157, 230); // Azul claro para o fundo do campo
+        Color corFundoCampo = new Color(255, 255, 255); // Azul claro para o fundo do campo
         Color corBotaoFundo = new Color(85, 142, 197); // Azul médio para o fundo do botão
         Color corBotaoTexto = Color.WHITE; // Texto branco para o botão
 
@@ -85,6 +92,9 @@ public class Tela_Login extends JFrame {
         setVisible(true);
     }
 
+    private void initComponents() {
+    }
+
     private void realizarLogin() {
         String usuario = campoUsuario.getText();
         String senha = new String(campoSenha.getPassword());
@@ -110,7 +120,7 @@ public class Tela_Login extends JFrame {
     // Método para criar uma borda arredondada com um raio específico
     private Border createRoundedBorder(Color color, int radius) {
         return BorderFactory.createCompoundBorder(
-                new LineBorder(color, 1, true), // Borda interna
+                new LineBorder(color, 2, true), // Borda interna
                 new EmptyBorder(radius, radius, radius, radius) // Espaçamento interno
         );
     }
