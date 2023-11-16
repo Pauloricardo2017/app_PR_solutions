@@ -1,4 +1,5 @@
 
+
 import javax.swing.*;
 import javax.swing.border.Border;
 import javax.swing.border.EmptyBorder;
@@ -6,9 +7,11 @@ import javax.swing.border.LineBorder;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.sql.*;
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
 
-public class Tela_Login extends javax.swing.JFrame {
+public class Tela_Login extends JFrame {
     Connection conexao = null;
     PreparedStatement pst = null;
     ResultSet rs = null;
@@ -16,10 +19,10 @@ public class Tela_Login extends javax.swing.JFrame {
     private JPasswordField campoSenha;
 
     public Tela_Login() {
-        initComponents ();
+        initComponents();
         conexao = ModuloConexao.conector();
-        System.out.println(conexao);
-        setTitle("PR_solutions   Tela de Login");
+
+        setTitle("PR_solutions   Login");
         setSize(800, 500);
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         setLocationRelativeTo(null);
@@ -32,8 +35,6 @@ public class Tela_Login extends javax.swing.JFrame {
         Color corFundoCampo = new Color(255, 255, 255); // Azul claro para o fundo do campo
         Color corBotaoFundo = new Color(85, 142, 197); // Azul médio para o fundo do botão
         Color corBotaoTexto = Color.WHITE; // Texto branco para o botão
-
-
 
         JPanel painel = new JPanel();
         painel.setLayout(new GridBagLayout());
@@ -80,12 +81,31 @@ public class Tela_Login extends javax.swing.JFrame {
         gbc.anchor = GridBagConstraints.CENTER;
         painel.add(botaoLogin, gbc);
 
+        // Label e ícone de status de conexão
+        JLabel labelStatus = new JLabel("Status da Conexão:");
+        labelStatus.setFont(new Font("Arial", Font.PLAIN, 18));
+        labelStatus.setForeground(corTexto);
+        gbc.gridy = 5;
+        painel.add(labelStatus, gbc);
+
+        JLabel labelIconeStatus = new JLabel();
+        gbc.gridy = 6;
+        painel.add(labelIconeStatus, gbc);
+
+        // Adiciona ActionListener ao botão de login
         botaoLogin.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                realizarLogin();
+                logar();
             }
         });
+
+        // Define o ícone de status com base na conexão
+        if (conexao != null) {
+            labelIconeStatus.setIcon(new ImageIcon(getClass().getResource("/icons/dbok.png")));
+        } else {
+            labelIconeStatus.setIcon(new ImageIcon(getClass().getResource("/icons/dberror.png")));
+        }
 
         add(painel);
 
@@ -95,16 +115,51 @@ public class Tela_Login extends javax.swing.JFrame {
     private void initComponents() {
     }
 
-    private void realizarLogin() {
+    private Border createRoundedBorder(Color color, int radius) {
+        return BorderFactory.createCompoundBorder(
+                new LineBorder(color, 2, true), // Borda interna
+                new EmptyBorder(radius, radius, radius, radius) // Espaçamento interno
+        );
+    }
+
+    private boolean verificarCredenciais(String usuario, String senha) {
+        String sql = "SELECT * FROM tbusuario WHERE login = ? AND senha = ?";
+
+        try {
+            pst = conexao.prepareStatement(sql);
+            pst.setString(1, usuario);
+            pst.setString(2, senha);
+
+            rs = pst.executeQuery();
+
+            return rs.next();
+        } catch (Exception e) {
+            e.printStackTrace();
+            return false;
+        } finally {
+            try {
+                if (rs != null) rs.close();
+                if (pst != null) pst.close();
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        }
+    }
+
+    private void logar() {
         String usuario = campoUsuario.getText();
         String senha = new String(campoSenha.getPassword());
 
-        // Adicione a lógica de autenticação aqui
+        // Verifica as credenciais no banco de dados
+        if (verificarCredenciais(usuario, senha)) {
+            // Adiciona a lógica para abrir a tela principal após o login bem-sucedido.
+            // Substitua 'TelaPrincipal' pelo nome da sua classe de tela principal.
+            new TelaPrincipal().setVisible(true);
 
-        if (usuario.equals("admin") && senha.equals("admin")) {
-            JOptionPane.showMessageDialog(this, "Login bem-sucedido");
+            // Fecha a tela de login
+            this.dispose();
         } else {
-            JOptionPane.showMessageDialog(this, "Login falhou. Tente novamente.");
+            JOptionPane.showMessageDialog(this, "Usuário ou senha incorreta. Tente novamente.");
         }
     }
 
@@ -116,15 +171,13 @@ public class Tela_Login extends javax.swing.JFrame {
             }
         });
     }
-
-    // Método para criar uma borda arredondada com um raio específico
-    private Border createRoundedBorder(Color color, int radius) {
-        return BorderFactory.createCompoundBorder(
-                new LineBorder(color, 2, true), // Borda interna
-                new EmptyBorder(radius, radius, radius, radius) // Espaçamento interno
-        );
-    }
 }
+
+
+
+
+
+
 
 
 
